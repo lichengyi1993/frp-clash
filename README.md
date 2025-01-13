@@ -127,8 +127,56 @@ Wants=network-online.target
 
 这确保了服务会在网络完全可用时启动。
 
-#### 4. **总结**
+### 目录结构
 
-通过 `systemd` 管理开机自启服务是一个高效且可靠的方式，尤其是在 ARM 架构的设备上。配置 `FRP` 和 `Clash` 服务的步骤类似，主要包括创建服务文件、设置网络依赖、重启策略等。使用 `After=network-online.target` 和 `Wants=network-online.target` 可以确保这些服务在网络准备好后自动启动。
+在配置 `FRP` 和 `Clash` 的开机自启服务时，以下是系统中的关键目录和文件结构概览：
 
-希望这篇文章能帮助你更好地理解如何在 Debian ARM 系统上配置这些服务的开机自启。如果有任何问题，欢迎留言讨论！
+#### 1. **FRP 相关目录结构**
+```bash
+/root/
+├── frp/
+│   ├── frpc                        # FRP 客户端可执行文件
+│   ├── frpc.ini                    # FRP 客户端配置文件
+│   ├── frpc_full.ini               # 完整版的 FRP 配置文件（可选）
+│   └── nohup.out                   # 运行日志文件（可选）
+└── frpc.service                    # systemd 服务文件，定义了 FRP 的开机自启配置
+```
+
+#### 2. **Clash 相关目录结构**
+```bash
+/root/
+├── clash/
+│   ├── clash-linux-arm64-latest    # Clash 可执行文件
+│   ├── 1736731740085.yml           # Clash 配置文件
+│   ├── Country.mmdb               # Clash 的 GeoIP 数据库文件（可选）
+└── clash.service                   # systemd 服务文件，定义了 Clash 的开机自启配置
+```
+
+#### 3. **systemd 配置目录**
+```bash
+/etc/systemd/system/
+├── frpc.service                    # 为 FRP 客户端配置的 systemd 服务文件
+└── clash.service                   # 为 Clash 配置的 systemd 服务文件
+```
+
+### 目录结构说明：
+
+- **`/root/frp/`**: 存放 `FRP` 客户端的可执行文件及其配置文件。
+  - `frpc`: `FRP` 客户端程序。
+  - `frpc.ini`: `FRP` 配置文件，定义了连接信息和代理设置。
+  - `nohup.out`: FRP 服务的运行日志文件（可选）。
+
+- **`/root/clash/`**: 存放 `Clash` 程序及其配置文件。
+  - `clash-linux-arm64-latest`: `Clash` 的可执行文件。
+  - `1736731740085.yml`: `Clash` 的配置文件，包含了代理规则和服务器配置。
+  - `Country.mmdb`: 用于地理位置代理的数据库文件（可选）。
+
+- **`/etc/systemd/system/`**: `systemd` 服务文件的存放目录。
+  - `frpc.service`: `FRP` 客户端的 `systemd` 服务文件，用于配置开机自启。
+  - `clash.service`: `Clash` 服务的 `systemd` 服务文件，用于配置开机自启。
+
+### 小贴士：
+- 如果你希望在启动时自动运行 `FRP` 或 `Clash`，确保将它们的 `systemd` 服务文件放在 `/etc/systemd/system/` 目录下，并使用 `systemctl enable` 来设置它们为开机自启。
+- 你可以使用 `journalctl -u <service-name>` 来查看服务的日志输出，帮助你排查启动问题。
+
+通过这种目录结构，你可以轻松管理这些服务，确保它们在系统启动时自动运行。
